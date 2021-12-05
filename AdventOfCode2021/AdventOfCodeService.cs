@@ -72,9 +72,17 @@ namespace AdventOfCode2021
       if (responseContent.Contains("That's the right answer!"))
       {
         _logger.LogInformation("Answer {answer} is correct for part {part} of day {day}.", answer, part, day);
-      } else if (responseContent.Contains("You don't seem to be solving the right level."))
+      } else if (responseContent.Contains("That's not the right answer."))
+      {
+        _logger.LogWarning("Answer {answer} is not correct for part {part} of day {day}.", answer, part, day);
+      }
+      else if (responseContent.Contains("You don't seem to be solving the right level."))
       {
         _logger.LogWarning("Part {part} of day {day} is already answered.", part, day);
+      }
+      else if (responseContent.Contains("You gave an answer too recently"))
+      {
+        _logger.LogWarning("Answer for part {part} of day {day} has been throttled.", part, day);
       }
     }
   }

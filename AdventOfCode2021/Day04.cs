@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -16,21 +17,14 @@ namespace AdventOfCode2021
       {
         foreach (var board in boards)
         {
-          foreach (var row in board)
+          if (!TryMarkNumber(board, number))
           {
-            var cells = row.Where(r => r.Number == number && !r.Marked).ToList();
-            if (cells.Count > 0)
-            {
-              foreach (var cell in cells)
-              {
-                cell.Marked = true;
-              }
+            continue;
+          }
 
-              if (HasBingo(board))
-              {
-                return CalculateScore(board, number).ToString();
-              }
-            }
+          if (HasBingo(board))
+          {
+            return CalculateScore(board, number).ToString();
           }
         }
       }
@@ -38,9 +32,46 @@ namespace AdventOfCode2021
       return "No winner";
     }
 
+    private static bool TryMarkNumber(IEnumerable<List<BingoCell>> board, int number)
+    {
+      var cells = board
+        .SelectMany(row => row)
+        .Where(c => c.Number == number && !c.Marked)
+        .ToList();
+
+      foreach (var cell in cells)
+      {
+        cell.Marked = true;
+      }
+
+      return cells.Count > 0;
+    }
+
     public string SolvePartTwo(ICollection<string> puzzleInput)
     {
-      throw new System.NotImplementedException();
+      var numbersToCall = puzzleInput.First().Split(",").Select(int.Parse);
+      var boardWithoutBingo = CreateBingoBoards(puzzleInput).ToList().ToList();
+      foreach (var number in numbersToCall)
+      {
+        foreach (var board in boardWithoutBingo.ToList())
+        {
+          if (!TryMarkNumber(board, number))
+          {
+            continue;
+          }
+
+          if (HasBingo(board))
+          {
+            if (boardWithoutBingo.Count == 1)
+            {
+              return CalculateScore(boardWithoutBingo.Single(), number).ToString();
+            }
+            boardWithoutBingo.Remove(board);
+          }
+        }
+      }
+
+      return "No winner";
     }
 
     internal static IEnumerable<List<List<BingoCell>>> CreateBingoBoards(IEnumerable<string> puzzleInput)
@@ -85,13 +116,9 @@ namespace AdventOfCode2021
         }
 
         candidateRowsForVerticalBingo = candidateRowsForVerticalBingo.Where(index => row[index].Marked).ToList();
-        if (candidateRowsForVerticalBingo.Count == 0)
-        {
-          return false;
-        }
       }
 
-      return true;
+      return candidateRowsForVerticalBingo.Count > 0;
     }
 
     private static int CalculateScore(IEnumerable<List<BingoCell>> board, int lastCalledNumber)
@@ -104,9 +131,10 @@ namespace AdventOfCode2021
       return sumOfUnmarkedNumbers * lastCalledNumber;
     }
 
+    [DebuggerDisplay("{Number} ({Marked})")]
     internal class BingoCell
     {
-      public int Number { get; set; }
+      public int Number { get; init; }
       public bool Marked { get; set; }
     }
   }
