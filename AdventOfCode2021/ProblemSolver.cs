@@ -37,7 +37,7 @@ namespace AdventOfCode2021
         }
         catch (Exception e)
         {
-          _logger.LogError(e, "Part one of {day} throw an unhandled exception.", problem.Day);
+          _logger.LogError(e, "Part 1 of {day} throw an unhandled exception.", problem.Day);
         }
 
         try
@@ -47,7 +47,7 @@ namespace AdventOfCode2021
         }
         catch (Exception e)
         {
-          _logger.LogError(e, "Part one of {day} throw an unhandled exception.", problem.Day);
+          _logger.LogError(e, "Part 2 of {day} throw an unhandled exception.", problem.Day);
         }
       }
     }
