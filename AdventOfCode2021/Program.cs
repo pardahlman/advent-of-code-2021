@@ -26,7 +26,7 @@ namespace AdventOfCode2021
       using var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
       var adventOfCodeService = new AdventOfCodeService(sessionId, loggerFactory.CreateLogger<AdventOfCodeService>());
       var problemSolver = new ProblemSolver(adventOfCodeService, loggerFactory.CreateLogger<ProblemSolver>());
-      await problemSolver.SolveAsync(new List<IProblem> { new Day04() }, cts.Token);
+      await problemSolver.SolveAsync(new List<IProblem> { new Day05() }, cts.Token);
     }
   }
 }
