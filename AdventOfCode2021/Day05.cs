@@ -10,54 +10,83 @@ namespace AdventOfCode2021
   {
     public int Day => 5;
 
-    public string SolvePartOne(ICollection<string> puzzleInput)
+    public string SolvePartOne(ICollection<string> puzzleInput) =>
+      SolveProblem(puzzleInput, IsVerticalLine, IsHorizontalLine);
+
+    public string SolvePartTwo(ICollection<string> puzzleInput) =>
+      SolveProblem(puzzleInput, IsVerticalLine, IsHorizontalLine, Is45DegreeLine);
+
+    private static bool IsVerticalLine(Line line) => line.Start.X == line.Stop.X;
+    private static bool IsHorizontalLine(Line line) => line.Start.Y == line.Stop.Y;
+    private static bool Is45DegreeLine(Line line)
+    {
+      var xComponent = line.Stop.X - line.Start.X;
+      var yComponent = line.Stop.Y - line.Start.Y;
+      var gradient = (double)yComponent / xComponent;
+      return Math.Abs(gradient) == 1;
+    }
+
+    private static string SolveProblem(ICollection<string> puzzleInput, params Predicate<Line>[] linePredicates)
     {
       var lines = CreateLines(puzzleInput);
       var grid = new List<List<int>>();
       foreach (var line in lines)
       {
-        if (!(IsVerticalLine(line) || IsHorizontalLine(line)))
+        if (!linePredicates.Any(p => p(line)))
         {
           continue;
         }
 
-        var xMin = Math.Min(line.Start.X, line.Stop.X);
-        var xMax = Math.Max(line.Start.X, line.Stop.X);
-        var yMin = Math.Min(line.Start.Y, line.Stop.Y);
-        var yMax = Math.Max(line.Start.Y, line.Stop.Y);
+        var xComponent = line.Stop.X - line.Start.X;
+        var yComponent = line.Stop.Y - line.Start.Y;
+        var gradient = (double)yComponent / xComponent;
 
-        while (grid.Count <= yMax)
+        int xDelta, yDelta;
+        if (double.IsPositiveInfinity(gradient) || double.IsNegativeInfinity(gradient))
         {
-          grid.Add(new List<int>());
+          xDelta = 0;
+          yDelta = yComponent > 0 ? 1 : -1;
+        }
+        else
+        {
+          xDelta = xComponent > 0 ? 1 : -1;
+          yDelta = (int)gradient * xDelta;
         }
 
-        for (var y = yMin; y <= yMax; y++)
+        var points = new List<Point> { line.Start };
+        var previousPoint = line.Start;
+        while (previousPoint != line.Stop)
         {
-          var row = grid[y];
-          while (row.Count <= xMax)
+          var nextPoint = new Point
+          {
+            X = previousPoint.X + xDelta,
+            Y = previousPoint.Y + yDelta
+          };
+          points.Add(nextPoint);
+          previousPoint = nextPoint;
+        }
+
+        foreach (var point in points)
+        {
+          while (grid.Count <= point.Y)
+          {
+            grid.Add(new List<int>());
+          }
+
+          var row = grid[point.Y];
+          while (row.Count <= point.X)
           {
             row.Add(0);
           }
 
-          for (var x = xMin; x <= xMax; x++)
-          {
-            row[x] += 1;
-          }
+          row[point.X] += 1;
         }
       }
 
       return grid.SelectMany(g => g).Count(i => i > 1).ToString();
     }
 
-    private static bool IsVerticalLine(Line line) => line.Start.X == line.Stop.X;
-    private static bool IsHorizontalLine(Line line) => line.Start.Y == line.Stop.Y;
-
-    public string SolvePartTwo(ICollection<string> puzzleInput)
-    {
-      throw new System.NotImplementedException();
-    }
-
-    private static IList<Line> CreateLines(ICollection<string> puzzleInput) =>
+    private static IEnumerable<Line> CreateLines(ICollection<string> puzzleInput) =>
       puzzleInput
         .Select(i =>
         {

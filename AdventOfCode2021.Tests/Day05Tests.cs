@@ -31,5 +31,18 @@ namespace AdventOfCode2021.Tests
       // Assert
       Assert.That(solution, Is.EqualTo("5"));
     }
+
+    [Test]
+    public void Can_Solve_Part_Two()
+    {
+      // Arrange
+      var problem = new Day05();
+
+      // Act
+      var solution = problem.SolvePartTwo(_testInput);
+
+      // Assert
+      Assert.That(solution, Is.EqualTo("12"));
+    }
   }
 }
