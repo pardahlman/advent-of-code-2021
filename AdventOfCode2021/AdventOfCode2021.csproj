@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include ="AdventOfCode2021.Tests"/>
+        <InternalsVisibleTo Include="AdventOfCode2021.Tests" />
     </ItemGroup>
 
     <ItemGroup>
