@@ -7,37 +7,48 @@ namespace AdventOfCode2021
   {
     public int Day => 6;
 
-    public string SolvePartOne(ICollection<string> puzzleInput)
-    {
-      var grownUps = puzzleInput.First().Split(",").Select(int.Parse).ToList();
-      var children = new List<int>();
+    public string SolvePartOne(ICollection<string> puzzleInput) => SolveProblem(puzzleInput, days: 80);
 
-      for (var day = 1; day <= 80; day++)
+    public string SolvePartTwo(ICollection<string> puzzleInput) => SolveProblem(puzzleInput, days: 256);
+
+    private static string SolveProblem(ICollection<string> puzzleInput, int days)
+    {
+      var grownUps = puzzleInput.First().Split(",")
+        .Select(int.Parse)
+        .GroupBy(f => f)
+        .ToDictionary(f => f.Key, f => (double)f.Count());
+
+      var children = new Dictionary<int, double>();
+
+      for (var day = 1; day <= days; day++)
       {
         // Transition grown-up fish to next stage
-        grownUps = grownUps.Select(NextStage).ToList();
-
-        // Spawn newborns for fish that entered stage 6
-        var newborns = grownUps.Where(SpawnsNewborn).Select(_ => 8).ToList();
+        grownUps = grownUps
+          .ToDictionary(
+            kvp => NextStage(kvp.Key),
+            kvp => kvp.Value);
 
         // Transition children to next stage
-        children = children.Select(fish => fish - 1).ToList();
+        children = children
+          .ToDictionary(
+            kvp => kvp.Key - 1,
+            kvp => kvp.Value);
+
+        // Spawn newborns for fish that entered stage 6
+        var numberOfNewborn = grownUps.ContainsKey(6) ? grownUps[6] : 0;
 
         // Move children that are in stage 6 to grown-up list
-        grownUps.AddRange((children.Where(c => c == 6)));
+        if (children.ContainsKey(6))
+        {
+          grownUps[6] = (grownUps.ContainsKey(6) ? grownUps[6] : 0) + children[6];
+          children.Remove(6);
+        }
 
         // Move newborns to rest of children
-        children = children.Where(fish => fish > 6).Concat(newborns).ToList();
+        children[8] = numberOfNewborn;
       }
 
-      return (grownUps.Count + children.Count).ToString();
-    }
-
-    private static bool SpawnsNewborn(int fish) => fish == 6;
-
-    public string SolvePartTwo(ICollection<string> puzzleInput)
-    {
-      throw new System.NotImplementedException();
+      return (grownUps.Sum(kvp => kvp.Value) + children.Sum(c => c.Value)).ToString();
     }
 
     private static int NextStage(int fish)
