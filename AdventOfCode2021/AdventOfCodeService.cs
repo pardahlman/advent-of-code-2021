@@ -72,7 +72,7 @@ namespace AdventOfCode2021
       if (responseContent.Contains("That's the right answer!"))
       {
         _logger.LogInformation("Answer {answer} is correct for part {part} of day {day}.", answer, part, day);
-      } else if (responseContent.Contains("That's not the right answer."))
+      } else if (responseContent.Contains("That's not the right answer"))
       {
         _logger.LogWarning("Answer {answer} is not correct for part {part} of day {day}.", answer, part, day);
       }
