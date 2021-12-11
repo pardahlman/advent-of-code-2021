@@ -14,9 +14,7 @@ namespace AdventOfCode2021
       var flashCount = 0;
       for (var day = 0; day < 100; day++)
       {
-        var hasFlashed = IncreaseEnergyLevel(grid).ToList();
-        PropagateFlashes(hasFlashed, grid);
-        flashCount += CalculateAndResetFlashedOctopuses(grid);
+        flashCount += Evolve(grid);
       }
 
       return flashCount.ToString();
@@ -32,12 +30,17 @@ namespace AdventOfCode2021
       while (flashCount != octopusCount)
       {
         day += 1;
-        var hasFlashed = IncreaseEnergyLevel(grid).ToList();
-        PropagateFlashes(hasFlashed, grid);
-        flashCount = CalculateAndResetFlashedOctopuses(grid);
+        flashCount = Evolve(grid);
       }
 
       return day.ToString();
+    }
+
+    private static int Evolve(List<List<Octopus>> grid)
+    {
+      var hasFlashed = IncreaseEnergyLevel(grid).ToList();
+      PropagateFlashes(hasFlashed, grid);
+      return CalculateAndResetFlashedOctopuses(grid);
     }
 
     private static int CalculateAndResetFlashedOctopuses(List<List<Octopus>> grid)
@@ -105,48 +108,49 @@ namespace AdventOfCode2021
 
     private static IEnumerable<Octopus> GetNeighbours(Position position, List<List<Octopus>> octopusGrid)
     {
-      var hasRowAbove = position.Y != 0;
-      var hasRowBelow = position.Y != octopusGrid.Count - 1;
-      var hasColumnToTheLeft = position.X != 0;
-      var hasColumnToTheRight = position.X != octopusGrid[position.X].Count - 1;
+      var (x, y) = position;
+      var hasRowAbove = y != 0;
+      var hasRowBelow = y != octopusGrid.Count - 1;
+      var hasColumnToTheLeft = x != 0;
+      var hasColumnToTheRight = x != octopusGrid[x].Count - 1;
 
       if (hasRowAbove)
       {
-        var rowAbove = octopusGrid[position.Y - 1];
-        yield return rowAbove[position.X];
+        var rowAbove = octopusGrid[y - 1];
+        yield return rowAbove[x];
         if (hasColumnToTheLeft)
         {
-          yield return rowAbove[position.X - 1];
+          yield return rowAbove[x - 1];
         }
 
         if (hasColumnToTheRight)
         {
-          yield return rowAbove[position.X + 1];
+          yield return rowAbove[x + 1];
         }
       }
 
       if (hasColumnToTheLeft)
       {
-        yield return octopusGrid[position.Y][position.X - 1];
+        yield return octopusGrid[y][x - 1];
       }
 
       if (hasColumnToTheRight)
       {
-        yield return octopusGrid[position.Y][position.X + 1];
+        yield return octopusGrid[y][x + 1];
       }
 
       if (hasRowBelow)
       {
-        var rowBelow = octopusGrid[position.Y + 1];
-        yield return rowBelow[position.X];
+        var rowBelow = octopusGrid[y + 1];
+        yield return rowBelow[x];
         if (hasColumnToTheLeft)
         {
-          yield return rowBelow[position.X - 1];
+          yield return rowBelow[x - 1];
         }
 
         if (hasColumnToTheRight)
         {
-          yield return rowBelow[position.X + 1];
+          yield return rowBelow[x + 1];
         }
       }
     }
@@ -155,7 +159,6 @@ namespace AdventOfCode2021
     {
       public Position Position { get; init; }
       public int EnergyLevel { get; set; }
-      public int FlashCount { get; set; }
     }
 
     private record Position(int X, int Y);
