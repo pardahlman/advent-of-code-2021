@@ -14,29 +14,57 @@ namespace AdventOfCode2021
       var flashCount = 0;
       for (var day = 0; day < 100; day++)
       {
-        var hasFlashed = new HashSet<Octopus>();
-        foreach (var octopus in grid.SelectMany(row => row))
-        {
-          octopus.EnergyLevel += 1;
-          if (octopus.EnergyLevel > 9)
-          {
-            hasFlashed.Add(octopus);
-          }
-        }
-
-        PropagateFlashes(hasFlashed.ToList(), grid);
-
-        foreach (var octopus in grid.SelectMany(r => r))
-        {
-          if (octopus.EnergyLevel > 9)
-          {
-            octopus.EnergyLevel = 0;
-            flashCount += 1;
-          }
-        }
+        var hasFlashed = IncreaseEnergyLevel(grid).ToList();
+        PropagateFlashes(hasFlashed, grid);
+        flashCount += CalculateAndResetFlashedOctopuses(grid);
       }
 
       return flashCount.ToString();
+    }
+
+    public string SolvePartTwo(ICollection<string> puzzleInput)
+    {
+      var grid = CreateOctopusGrid(puzzleInput);
+      var octopusCount = grid.Sum(row => row.Count);
+
+      var day = 0;
+      var flashCount = 0;
+      while (flashCount != octopusCount)
+      {
+        day += 1;
+        var hasFlashed = IncreaseEnergyLevel(grid).ToList();
+        PropagateFlashes(hasFlashed, grid);
+        flashCount = CalculateAndResetFlashedOctopuses(grid);
+      }
+
+      return day.ToString();
+    }
+
+    private static int CalculateAndResetFlashedOctopuses(List<List<Octopus>> grid)
+    {
+      var flashCount = 0;
+      foreach (var octopus in grid.SelectMany(r => r))
+      {
+        if (octopus.EnergyLevel > 9)
+        {
+          octopus.EnergyLevel = 0;
+          flashCount += 1;
+        }
+      }
+
+      return flashCount;
+    }
+
+    private static IEnumerable<Octopus> IncreaseEnergyLevel(List<List<Octopus>> grid)
+    {
+      foreach (var octopus in grid.SelectMany(row => row))
+      {
+        octopus.EnergyLevel += 1;
+        if (octopus.EnergyLevel > 9)
+        {
+          yield return octopus;
+        }
+      }
     }
 
     private static void PropagateFlashes(List<Octopus> newlyFlashed, List<List<Octopus>> grid)
@@ -121,11 +149,6 @@ namespace AdventOfCode2021
           yield return rowBelow[position.X + 1];
         }
       }
-    }
-
-    public string SolvePartTwo(ICollection<string> puzzleInput)
-    {
-      throw new System.NotImplementedException();
     }
 
     private class Octopus

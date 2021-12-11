@@ -42,7 +42,7 @@ namespace AdventOfCode2021.Tests
       var solution = problem.SolvePartTwo(_testInput);
 
       // Assert
-      Assert.That(solution, Is.EqualTo("unknown"));
+      Assert.That(solution, Is.EqualTo("195"));
     }
   }
 }
