@@ -1,6 +1,6 @@
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace AdventOfCode2021
 {
@@ -11,9 +11,19 @@ namespace AdventOfCode2021
     private const string StartCave = "start";
     private const string EndCave = "end";
 
-    public string SolvePartOne(ICollection<string> puzzleInput)
-    {
-      var caveConnections = puzzleInput
+    public string SolvePartOne(ICollection<string> puzzleInput) =>
+      ExploreCave(new List<string> { StartCave }, CreateCaveConnections(puzzleInput))
+        .Count(path => !HasVisitedSmallCaveTwice(path))
+        .ToString();
+
+    public string SolvePartTwo(ICollection<string> puzzleInput) =>
+      ExploreCave(new List<string> { StartCave }, CreateCaveConnections(puzzleInput))
+        .Count()
+        .ToString();
+
+    private static ImmutableDictionary<string, ImmutableList<string>> CreateCaveConnections(
+      IEnumerable<string> puzzleInput) =>
+      puzzleInput
         .SelectMany(row =>
         {
           var caves = row.Split("-");
@@ -24,17 +34,12 @@ namespace AdventOfCode2021
           };
         })
         .GroupBy(c => c.Item1, c => c.Item2)
-        .ToDictionary(c => c.Key, c => c.ToList());
-      caveConnections[EndCave] = new List<string>();
+        .ToImmutableDictionary(
+          g => g.Key,
+          g => g.Where(c => c!= StartCave).ToImmutableList()
+        );
 
-      var paths = caveConnections[StartCave]
-        .SelectMany(nextCave => ExploreCave(new List<string> { StartCave, nextCave }, caveConnections))
-        .ToList();
-
-      return paths.Count.ToString();
-    }
-
-    private static List<List<string>> ExploreCave(List<string> path, IReadOnlyDictionary<string, List<string>> caveConnections)
+    private static IEnumerable<List<string>> ExploreCave(List<string> path, ImmutableDictionary<string, ImmutableList<string>> caveConnections)
     {
       var currentCave = path.Last();
       if (currentCave == EndCave)
@@ -43,14 +48,27 @@ namespace AdventOfCode2021
       }
 
       return caveConnections[currentCave]
-        .Where(adjacentCave => adjacentCave.All(char.IsUpper) || !path.Contains(adjacentCave))
-        .SelectMany(nextCave => ExploreCave(new List<string>(path) { nextCave }, caveConnections))
-        .ToList();
+        .Where(adjacentCave =>
+        {
+          if (adjacentCave.All(char.IsUpper))
+          {
+            return true;
+          }
+
+          if (!path.Contains(adjacentCave))
+          {
+            return true;
+          }
+
+          return !HasVisitedSmallCaveTwice(path);
+        })
+        .SelectMany(nextCave => ExploreCave(new List<string>(path) { nextCave }, caveConnections));
     }
 
-    public string SolvePartTwo(ICollection<string> puzzleInput)
-    {
-      throw new System.NotImplementedException();
-    }
+    private static bool HasVisitedSmallCaveTwice(IEnumerable<string> path) =>
+      path
+        .Where(c => c.All(char.IsLower))
+        .GroupBy(c => c)
+        .Max(c => c.Count()) == 2;
   }
 }
