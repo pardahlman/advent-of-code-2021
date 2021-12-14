@@ -11,36 +11,53 @@ namespace AdventOfCode2021
     public string SolvePartOne(ICollection<string> puzzleInput)
     {
       var (polymerTemplate, pairInsertionRule) = ParsePuzzleInput(puzzleInput);
-      var result = Evolve(polymerTemplate, pairInsertionRule).Skip(9).First();
-      var group = result.GroupBy(c => c).ToList();
-      return (group.Max(g => g.Count()) - group.Min(g => g.Count())).ToString();
+      return SolveProblem(polymerTemplate, pairInsertionRule, 10);
     }
 
     public string SolvePartTwo(ICollection<string> puzzleInput)
     {
-      throw new System.NotImplementedException();
+      var (polymerTemplate, pairInsertionRule) = ParsePuzzleInput(puzzleInput);
+      return SolveProblem(polymerTemplate, pairInsertionRule, 40);
     }
 
-    private IEnumerable<string> Evolve(string polymerTemplate, IImmutableDictionary<string, char> rules)
+    private static string SolveProblem(string polymer, IImmutableDictionary<string, char> rules, int iterations)
     {
-      while (true)
+      var pairCount = new Dictionary<string, long>();
+      for (var i = 0; i < polymer.Length -1; i++)
       {
-        var nextTemplate = "";
-        for (var i = 0; i < polymerTemplate.Length -1; i++)
+        var pair = polymer[i..(i + 2)];
+        pairCount[pair] = pairCount.GetValueOrDefault(pair) + 1;
+      }
+
+      for (var i = 0; i < iterations; i++)
+      {
+        var next = new Dictionary<string, long>();
+        foreach (var (pair, count) in pairCount)
         {
-          var pair = polymerTemplate[i..(i+2)];
-          nextTemplate += pair[0];
-          if (rules.ContainsKey(pair))
+          if (!rules.ContainsKey(pair))
           {
-            nextTemplate += rules[pair];
+            continue;
           }
+
+          var newElement = rules[pair];
+          var firstNewPair = $"{pair[0]}{newElement}";
+          var secondNewPair = $"{newElement}{pair[1]}";
+
+          next[firstNewPair] = next.GetValueOrDefault(firstNewPair) + count;
+          next[secondNewPair] = next.GetValueOrDefault(secondNewPair) + count;
         }
 
-        nextTemplate += polymerTemplate.Last();
-
-        yield return nextTemplate;
-        polymerTemplate = nextTemplate;
+        pairCount = next;
       }
+
+      var elementCount = new Dictionary<char, long>();
+      foreach (var (pair, count) in pairCount)
+      {
+        elementCount[pair[0]] = elementCount.GetValueOrDefault(pair[0]) + count;
+      }
+      elementCount[polymer.Last()] = elementCount.GetValueOrDefault(polymer.Last()) + 1;
+
+      return (elementCount.Values.Max() - elementCount.Values.Min()).ToString();
     }
 
     private static (string, IImmutableDictionary<string, char>) ParsePuzzleInput(ICollection<string> puzzleInput)
@@ -54,7 +71,5 @@ namespace AdventOfCode2021
 
       return (polymerTemplate, pairInsertionRules);
     }
-
-    private record PairInsertionRule(char ElementA, char ElementB, char ElementToInsert);
   }
 }
