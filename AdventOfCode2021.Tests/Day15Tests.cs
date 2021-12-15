@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 
 namespace AdventOfCode2021.Tests
@@ -42,7 +43,7 @@ namespace AdventOfCode2021.Tests
       var solution = problem.SolvePartTwo(_testInput);
 
       // Assert
-      Assert.That(solution, Is.EqualTo("2188189693529"));
+      Assert.That(solution, Is.EqualTo("315"));
     }
   }
 }

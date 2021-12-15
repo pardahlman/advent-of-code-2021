@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -12,6 +11,16 @@ namespace AdventOfCode2021
     public string SolvePartOne(ICollection<string> puzzleInput)
     {
       var cave = ParsePuzzleInput(puzzleInput);
+      var start = (0, 0);
+      var destination = (cave.Keys.Max(p => p.x), cave.Keys.Max(p => p.y));
+
+      return CalculateRisk(cave, start, destination).ToString();
+    }
+
+    public string SolvePartTwo(ICollection<string> puzzleInput)
+    {
+      var originalCave = ParsePuzzleInput(puzzleInput);
+      var cave = ExpandCave(originalCave);
       var start = (0, 0);
       var destination = (cave.Keys.Max(p => p.x), cave.Keys.Max(p => p.y));
 
@@ -73,11 +82,6 @@ namespace AdventOfCode2021
       return int.MaxValue;
     }
 
-    public string SolvePartTwo(ICollection<string> puzzleInput)
-    {
-      throw new NotImplementedException();
-    }
-
     private static IEnumerable<(int, int)> GetNeighbours((int, int) position)
     {
       var (x, y) = position;
@@ -93,6 +97,26 @@ namespace AdventOfCode2021
         .SelectMany((row, y) => row
           .Select((risk, x) => ((x, y), int.Parse(risk.ToString()))))
         .ToImmutableDictionary(pair => pair.Item1, pair => pair.Item2);
+    }
+
+    private static IImmutableDictionary<(int x, int y), int> ExpandCave(IReadOnlyDictionary<(int x, int y), int> cave)
+    {
+      var expandedCave = new Dictionary<(int, int), int>();
+      var caveWidth = cave.Keys.Max(k => k.y) + 1;
+      var caveHeight = cave.Keys.Max(k => k.x) + 1;
+
+      foreach (var ((x, y), risk) in cave)
+      {
+        for (var verticalRepeat = 0; verticalRepeat < 5; verticalRepeat++)
+        {
+          for (var horizontalRepeat = 0; horizontalRepeat < 5; horizontalRepeat++)
+          {
+            expandedCave[(x + horizontalRepeat * caveWidth, y + verticalRepeat * caveHeight)] = ((risk - 1 + verticalRepeat + horizontalRepeat) % 9) + 1;
+          }
+        }
+      }
+
+      return expandedCave.ToImmutableDictionary();
     }
   }
 }
