@@ -147,12 +147,7 @@ namespace AdventOfCode2021
         _position = 0;
       }
 
-      public string ReadNext(int count)
-      {
-        var chunk = _binaryString[_position..(_position + count)];
-        _position += count;
-        return chunk;
-      }
+      public string ReadNext(int count) => _binaryString[_position..(_position += count)];
     }
 
     public class BitsTransmission
