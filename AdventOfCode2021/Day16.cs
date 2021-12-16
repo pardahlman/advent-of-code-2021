@@ -17,23 +17,7 @@ namespace AdventOfCode2021
     public string SolvePartTwo(ICollection<string> puzzleInput)
     {
       var transmission = ParseRootTransmission(puzzleInput.Single());
-      return CalculateValue(transmission).ToString();
-    }
-
-    private static long CalculateValue(BitsTransmission transmission)
-    {
-      return transmission.Type switch
-        {
-          0 => transmission.SubPackets.Sum(CalculateValue),
-          1 => transmission.SubPackets.Aggregate(1L, (product, t) => product * CalculateValue(t)),
-          2 => transmission.SubPackets.Min(CalculateValue),
-          3 => transmission.SubPackets.Max(CalculateValue),
-          4 => transmission.Value,
-          5 => CalculateValue(transmission.SubPackets[0]) > CalculateValue(transmission.SubPackets[1]) ? 1 : 0,
-          6 => CalculateValue(transmission.SubPackets[0]) < CalculateValue(transmission.SubPackets[1]) ? 1 : 0,
-          7 => CalculateValue(transmission.SubPackets[0]) == CalculateValue(transmission.SubPackets[1]) ? 1 : 0,
-          _ => throw new Exception($"Unexpected type {transmission.Type}")
-        };
+      return transmission.Value.ToString();
     }
 
     private static long SumVersion(BitsTransmission transmission) =>
@@ -58,11 +42,7 @@ namespace AdventOfCode2021
 
     private static long BinaryToLong(string binary) => Convert.ToInt64(binary, fromBase: 2);
 
-    public static BitsTransmission ParseRootTransmission(string hexString)
-    {
-      var binaryString = HexToBinary(hexString);
-      return ParseTransmissions(binaryString).Single();
-    }
+    public static BitsTransmission ParseRootTransmission(string hexString) => ParseTransmissions(HexToBinary(hexString)).Single();
 
     private static List<BitsTransmission> ParseTransmissions(string binaryString)
     {
@@ -113,12 +93,27 @@ namespace AdventOfCode2021
           throw new Exception();
       }
 
-      return new BitsTransmission
+      var value = type switch
+      {
+        0 => subPackets.Sum(p => p.Value),
+        1 => subPackets.Aggregate(1L, (product, t) => product * t.Value),
+        2 => subPackets.Min(p => p.Value),
+        3 => subPackets.Max(p => p.Value),
+        5 => subPackets[0].Value > subPackets[1].Value ? 1 : 0,
+        6 => subPackets[0].Value < subPackets[1].Value ? 1 : 0,
+        7 => subPackets[0].Value == subPackets[1].Value ? 1 : 0,
+        _ => throw new Exception($"Unexpected type {type}")
+      };
+
+      var transmission = new BitsTransmission
       {
         Version = version,
         Type = type,
-        SubPackets = subPackets
+        SubPackets = subPackets,
+        Value = value
       };
+
+      return transmission;
     }
 
     private static BitsTransmission ParseLiteralTransmission(BitReader reader, int version, int type)
