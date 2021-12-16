@@ -85,5 +85,25 @@ namespace AdventOfCode2021.Tests
       // Assert
       Assert.That(result, Is.EqualTo(expected));
     }
+
+    [TestCase("C200B40A82", "3")]
+    [TestCase("04005AC33890", "54")]
+    [TestCase("880086C3E88112", "7")]
+    [TestCase("CE00C43D881120", "9")]
+    [TestCase("D8005AC2A8F0", "1")]
+    [TestCase("F600BC2D8F", "0")]
+    [TestCase("9C005AC2F8F0", "0")]
+    [TestCase("9C0141080250320F1802104A08", "1")]
+    public void Can_Solve_Part_2(string input, string expected)
+    {
+      // Arrange
+      var problem = new Day16();
+
+      // Act
+      var result = problem.SolvePartTwo(new List<string> { input });
+
+      // Assert
+      Assert.That(result, Is.EqualTo(expected));
+    }
   }
 }

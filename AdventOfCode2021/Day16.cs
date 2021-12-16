@@ -16,7 +16,28 @@ namespace AdventOfCode2021
 
     public string SolvePartTwo(ICollection<string> puzzleInput)
     {
-      throw new NotImplementedException();
+      var transmission = ParseRootTransmission(puzzleInput.Single());
+      return CalculateValue(transmission).ToString();
+    }
+
+    private static long CalculateValue(BitsTransmission transmission)
+    {
+      return transmission switch
+      {
+        LiteralTransmission literalTransmission => literalTransmission.Value,
+        OperationTransmission operation => transmission.Type switch
+        {
+          0 => operation.SubPackets.Sum(CalculateValue),
+          1 => operation.SubPackets.Aggregate(1L, (product, t) => product * CalculateValue(t)),
+          2 => operation.SubPackets.Min(CalculateValue),
+          3 => operation.SubPackets.Max(CalculateValue),
+          5 => CalculateValue(operation.SubPackets[0]) > CalculateValue(operation.SubPackets[1]) ? 1 : 0,
+          6 => CalculateValue(operation.SubPackets[0]) < CalculateValue(operation.SubPackets[1]) ? 1 : 0,
+          7 => CalculateValue(operation.SubPackets[0]) == CalculateValue(operation.SubPackets[1]) ? 1 : 0,
+          _ => throw new Exception($"Unexpected type {transmission.Type}")
+        },
+        _ => throw new Exception($"Unable to classify transmission")
+      };
     }
 
     private static long SumVersion(BitsTransmission transmission) =>
