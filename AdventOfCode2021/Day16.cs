@@ -40,8 +40,6 @@ namespace AdventOfCode2021
 
     private static int BinaryToInt(string binary) => Convert.ToInt32(binary, fromBase: 2);
 
-    private static long BinaryToLong(string binary) => Convert.ToInt64(binary, fromBase: 2);
-
     public static BitsTransmission ParseRootTransmission(string hexString) => ParseTransmissions(HexToBinary(hexString)).Single();
 
     private static List<BitsTransmission> ParseTransmissions(string binaryString)
@@ -130,7 +128,7 @@ namespace AdventOfCode2021
       {
         Version = version,
         Type = type,
-        Value = BinaryToLong(binaryValue)
+        Value = Convert.ToInt64(binaryValue, fromBase: 2)
       };
     }
 
