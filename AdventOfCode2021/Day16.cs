@@ -22,30 +22,25 @@ namespace AdventOfCode2021
 
     private static long CalculateValue(BitsTransmission transmission)
     {
-      return transmission switch
-      {
-        LiteralTransmission literalTransmission => literalTransmission.Value,
-        OperationTransmission operation => transmission.Type switch
+      return transmission.Type switch
         {
-          0 => operation.SubPackets.Sum(CalculateValue),
-          1 => operation.SubPackets.Aggregate(1L, (product, t) => product * CalculateValue(t)),
-          2 => operation.SubPackets.Min(CalculateValue),
-          3 => operation.SubPackets.Max(CalculateValue),
-          5 => CalculateValue(operation.SubPackets[0]) > CalculateValue(operation.SubPackets[1]) ? 1 : 0,
-          6 => CalculateValue(operation.SubPackets[0]) < CalculateValue(operation.SubPackets[1]) ? 1 : 0,
-          7 => CalculateValue(operation.SubPackets[0]) == CalculateValue(operation.SubPackets[1]) ? 1 : 0,
+          0 => transmission.SubPackets.Sum(CalculateValue),
+          1 => transmission.SubPackets.Aggregate(1L, (product, t) => product * CalculateValue(t)),
+          2 => transmission.SubPackets.Min(CalculateValue),
+          3 => transmission.SubPackets.Max(CalculateValue),
+          4 => transmission.Value,
+          5 => CalculateValue(transmission.SubPackets[0]) > CalculateValue(transmission.SubPackets[1]) ? 1 : 0,
+          6 => CalculateValue(transmission.SubPackets[0]) < CalculateValue(transmission.SubPackets[1]) ? 1 : 0,
+          7 => CalculateValue(transmission.SubPackets[0]) == CalculateValue(transmission.SubPackets[1]) ? 1 : 0,
           _ => throw new Exception($"Unexpected type {transmission.Type}")
-        },
-        _ => throw new Exception($"Unable to classify transmission")
-      };
+        };
     }
 
     private static long SumVersion(BitsTransmission transmission) =>
-      transmission switch
+      transmission.Type switch
       {
-        LiteralTransmission literal => literal.Version,
-        OperationTransmission operationTransmission => transmission.Version + operationTransmission.SubPackets.Sum(SumVersion),
-        _ => throw new Exception("Unable to parse transmission")
+        4 => transmission.Version,
+        _ => transmission.Version + transmission.SubPackets.Sum(SumVersion),
       };
 
     public static string HexToBinary(string hexString) =>
@@ -118,7 +113,7 @@ namespace AdventOfCode2021
           throw new Exception();
       }
 
-      return new OperationTransmission
+      return new BitsTransmission
       {
         Version = version,
         Type = type,
@@ -126,7 +121,7 @@ namespace AdventOfCode2021
       };
     }
 
-    private static LiteralTransmission ParseLiteralTransmission(BitReader reader, int version, int type)
+    private static BitsTransmission ParseLiteralTransmission(BitReader reader, int version, int type)
     {
       var binaryValue = "";
       bool keepReading;
@@ -136,7 +131,7 @@ namespace AdventOfCode2021
         binaryValue += reader.ReadNext(4);
       } while (keepReading);
 
-      return new LiteralTransmission
+      return new BitsTransmission
       {
         Version = version,
         Type = type,
@@ -165,19 +160,11 @@ namespace AdventOfCode2021
       }
     }
 
-    public abstract class BitsTransmission
+    public class BitsTransmission
     {
       public int Version { get; init; }
       public int Type { get; init; }
-    }
-
-    public class LiteralTransmission : BitsTransmission
-    {
       public long Value { get; init; }
-    }
-
-    public class OperationTransmission : BitsTransmission
-    {
       public List<BitsTransmission> SubPackets { get; init; }
     }
   }

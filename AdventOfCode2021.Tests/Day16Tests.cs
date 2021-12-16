@@ -25,7 +25,7 @@ namespace AdventOfCode2021.Tests
       const string package = "D2FE28";
 
       // Act
-      var transmission = Day16.ParseRootTransmission(package) as Day16.LiteralTransmission;
+      var transmission = Day16.ParseRootTransmission(package);
 
       // Assert
       Assert.That(transmission.Version, Is.EqualTo(6));
@@ -40,15 +40,13 @@ namespace AdventOfCode2021.Tests
       const string package = "38006F45291200";
 
       // Act
-      var transmission = Day16.ParseRootTransmission(package) as Day16.OperationTransmission;
+      var transmission = Day16.ParseRootTransmission(package);
 
       // Assert
       Assert.That(transmission, Is.Not.Null);
       Assert.That(transmission.SubPackets, Has.Count.EqualTo(2));
-      Assert.That(transmission.SubPackets[0], Is.TypeOf<Day16.LiteralTransmission>());
-      Assert.That(transmission.SubPackets[1], Is.TypeOf<Day16.LiteralTransmission>());
-      Assert.That(((Day16.LiteralTransmission)transmission.SubPackets[0]).Value, Is.EqualTo(10));
-      Assert.That(((Day16.LiteralTransmission)transmission.SubPackets[1]).Value, Is.EqualTo(20));
+      Assert.That((transmission.SubPackets[0]).Value, Is.EqualTo(10));
+      Assert.That((transmission.SubPackets[1]).Value, Is.EqualTo(20));
     }
 
     [Test]
@@ -58,16 +56,14 @@ namespace AdventOfCode2021.Tests
       const string package = "EE00D40C823060";
 
       // Act
-      var transmission = Day16.ParseRootTransmission(package) as Day16.OperationTransmission;
+      var transmission = Day16.ParseRootTransmission(package);
 
       // Assert
       Assert.That(transmission, Is.Not.Null);
       Assert.That(transmission.SubPackets, Has.Count.EqualTo(3));
-      Assert.That(transmission.SubPackets[0], Is.TypeOf<Day16.LiteralTransmission>());
-      Assert.That(transmission.SubPackets[1], Is.TypeOf<Day16.LiteralTransmission>());
-      Assert.That(((Day16.LiteralTransmission)transmission.SubPackets[0]).Value, Is.EqualTo(1));
-      Assert.That(((Day16.LiteralTransmission)transmission.SubPackets[1]).Value, Is.EqualTo(2));
-      Assert.That(((Day16.LiteralTransmission)transmission.SubPackets[2]).Value, Is.EqualTo(3));
+      Assert.That((transmission.SubPackets[0]).Value, Is.EqualTo(1));
+      Assert.That((transmission.SubPackets[1]).Value, Is.EqualTo(2));
+      Assert.That((transmission.SubPackets[2]).Value, Is.EqualTo(3));
     }
 
     [TestCase("8A004A801A8002F478", "16")]
