@@ -34,7 +34,7 @@ namespace AdventOfCode2021.Tests
       var solution = problem.SolvePartTwo(_testInput);
 
       // Assert
-      Assert.That(solution, Is.EqualTo("315"));
+      Assert.That(solution, Is.EqualTo("112"));
     }
   }
 }

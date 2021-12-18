@@ -9,7 +9,18 @@ namespace AdventOfCode2021
   {
     public int Day => 17;
 
-    public string SolvePartOne(ICollection<string> puzzleInput)
+    public string SolvePartOne(ICollection<string> puzzleInput) => GetAllMatchingTrajectories(puzzleInput)
+      .Max(t => t.Max(p => p.y))
+      .ToString();
+
+    public string SolvePartTwo(ICollection<string> puzzleInput)
+    {
+      return GetAllMatchingTrajectories(puzzleInput)
+        .Count
+        .ToString();
+    }
+
+    private static List<List<(int x, int y)>> GetAllMatchingTrajectories(ICollection<string> puzzleInput)
     {
       var match = Regex.Matches(puzzleInput.Single(), "-?\\d+").Select(m => int.Parse(m.Value)).ToList();
 
@@ -18,7 +29,7 @@ namespace AdventOfCode2021
       var yMin = match[2];
       var yMax = match[3];
 
-      // Assumption: the targets X position is always positive => The initial X is 0 or greater.
+      // Assumption: the targets X position is always positive => The initial X velocity is 0 or greater.
       const int minVelocityX = 0;
 
       // Initial X velocity can not be larger than xMax, as it would result in a position to the right of the target
@@ -40,9 +51,9 @@ namespace AdventOfCode2021
 
       var matchingTrajectories = new List<List<(int x, int y)>>();
 
-      for (var velocityX = minVelocityX; velocityX < maxVelocityX; velocityX++)
+      for (var velocityX = minVelocityX; velocityX <= maxVelocityX; velocityX++)
       {
-        for (var velocityY = minVelocityY; velocityY < maxVelocityY; velocityY++)
+        for (var velocityY = minVelocityY; velocityY <= maxVelocityY; velocityY++)
         {
           var trajectory = GetTrajectory((0, 0), (velocityX, velocityY))
             .TakeWhile(position => position.x <= xMax && position.y >= yMin)
@@ -56,7 +67,7 @@ namespace AdventOfCode2021
         }
       }
 
-      return matchingTrajectories.Max(t => t.Max(p => p.y)).ToString();
+      return matchingTrajectories;
     }
 
     private static IEnumerable<(int x, int y)> GetTrajectory((int x, int y) position, (int vx, int vy) velocity)
@@ -71,11 +82,6 @@ namespace AdventOfCode2021
         velocity.vx = velocity.vx == 0 ? 0 : velocity.vx - xDrag;
         velocity.vy -= 1;
       }
-    }
-
-    public string SolvePartTwo(ICollection<string> puzzleInput)
-    {
-      throw new NotImplementedException();
     }
   }
 }
